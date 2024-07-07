@@ -1,100 +1,111 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import React, { useEffect, useState, useRef } from 'react';
+import { Slider } from "@/components/ui/slider";
+import { Button } from "@/components/ui/button";
+import { ColorPicker } from '@/components/ui/color-picker';
+import { Checkbox } from '@/components/ui/checkbox';
+
+const generateNoise = (canvas: HTMLCanvasElement | null, size: number, density: number, color: string, rgbMode: boolean): void => {
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  const imageData = ctx.createImageData(size, size);
+
+  for (let i = 0; i < imageData.data.length; i += 4) {
+    const threshold = (density / 100) * 255;
+
+    if (rgbMode) {
+      const r = Math.random() * 255;
+      const g = Math.random() * 255;
+      const b = Math.random() * 255;
+      const alpha = Math.random() < (density / 100) ? 255 : 0;
+
+      imageData.data[i] = r;
+      imageData.data[i + 1] = g;
+      imageData.data[i + 2] = b;
+      imageData.data[i + 3] = alpha;
+    } else {
+      const r = Math.random() * 255;
+      const alpha = r < threshold ? 255 : 0;
+
+      imageData.data[i] = parseInt(color.slice(1, 3), 16);
+      imageData.data[i + 1] = parseInt(color.slice(3, 5), 16);
+      imageData.data[i + 2] = parseInt(color.slice(5, 7), 16);
+      imageData.data[i + 3] = alpha;
+    }
+  }
+
+  ctx.putImageData(imageData, 0, 0);
+};
+
+const exportCanvas = (canvas: HTMLCanvasElement | null, size: number): void => {
+  if (!canvas) return;
+
+  const link = document.createElement('a');
+  link.href = canvas.toDataURL('image/png');
+  link.download = `noise_${size}x${size}.png`;
+  link.click();
+};
+
+export default function Home(): JSX.Element {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [size, setSize] = useState<number>(320);
+  const [density, setDensity] = useState<number>(50);
+  const [color, setColor] = useState<string>('#000000');
+  const [rgbMode, setRgbMode] = useState<boolean>(false);
+
+  useEffect(() => {
+    generateNoise(canvasRef.current, size, density, color, rgbMode);
+  }, [size, density, color, rgbMode]);
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
+    <div className="flex flex-col items-center gap-4">
+      <div className="w-full max-w-xs space-y-2">
+        <label className='text-sm font-medium text-muted-foreground'>{"Preview (Scaled): "}</label>
+        <canvas
+          ref={canvasRef}
+          width={size}
+          height={size}
+          className="ring-1 ring-border bg-white rounded-2xl h-[320px] w-[320px]"
         />
-        <ol className="font-mono list-inside list-decimal text-sm text-center sm:text-left">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      </div>
+      <div className="w-full max-w-xs space-y-2">
+        <label className='text-sm font-medium text-muted-foreground'>Size: {size}x{size}</label>
+        <Slider 
+          value={[size]} 
+          onValueChange={(value: number[]) => setSize(value[0])} 
+          min={32} 
+          max={512} 
+          step={32}
+        />
+      </div>
+      <div className="w-full max-w-xs space-y-2">
+        <label className='text-sm font-medium text-muted-foreground'>Density: {density}%</label>
+        <Slider 
+          value={[density]} 
+          onValueChange={(value: number[]) => setDensity(value[0])} 
+          min={0} 
+          max={100} 
+          step={1}
+        />
+      </div>
+      <div className="w-full max-w-xs space-y-2">
+        <div className='flex justify-between'>
+          <label className='text-sm font-medium text-muted-foreground'>Color: {color}</label>
+          <div className='space-x-1 flex items-center'>
+            <label className='text-sm font-medium text-muted-foreground'>RGB</label>
+            <Checkbox className='rounded' checked={rgbMode} onCheckedChange={(checked: boolean) => setRgbMode(checked)} />
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file-text.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        <ColorPicker value={color} onChange={setColor} className='w-full' disabled={rgbMode}/>
+      </div>
+      <div className="flex w-full grow justify-between">
+        <Button onClick={() => generateNoise(canvasRef.current, size, density, color, rgbMode)}>Regenerate</Button>
+        <Button variant={"outline"} onClick={() => exportCanvas(canvasRef.current, size)}>Export</Button>
+      </div>
     </div>
   );
 }

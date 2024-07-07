@@ -1,5 +1,5 @@
 {
-  "name": "noiser",
+  "name": "noisr",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,9 +9,26 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@radix-ui/react-aspect-ratio": "^1.1.0",
+    "@radix-ui/react-checkbox": "^1.1.1",
+    "@radix-ui/react-dropdown-menu": "^2.1.1",
+    "@radix-ui/react-popover": "^1.1.1",
+    "@radix-ui/react-select": "^2.1.1",
+    "@radix-ui/react-slider": "^1.2.0",
+    "@radix-ui/react-slot": "^1.1.0",
+    "@radix-ui/react-switch": "^1.1.0",
+    "@radix-ui/react-toggle": "^1.1.0",
+    "@radix-ui/react-tooltip": "^1.1.2",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.400.0",
+    "next": "15.0.0-rc.0",
+    "next-themes": "^0.3.0",
     "react": "19.0.0-rc-f994737d14-20240522",
+    "react-colorful": "^5.6.1",
     "react-dom": "19.0.0-rc-f994737d14-20240522",
-    "next": "15.0.0-rc.0"
+    "tailwind-merge": "^2.3.0",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "typescript": "^5",
