@@ -16,6 +16,7 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
   title: "Noisr. - A simple noise texture generator",
+  metadataBase: new URL('https://noisr.gergo.cc'),
   description: "Genrate noise texture with custom size, density and color, and download it as PNG. For your design projects, UI, or just for fun.",
   openGraph: {
     title: "Noisr. - A simple noise texture generator",
